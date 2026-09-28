@@ -1,44 +1,71 @@
-const jadwalKuliah = [
-    { id_matkul: 'SI101', nama_matkul: 'Pengembangan Sistem Berbasis Web', hari: 'Senin', sks: 3, status_wajib: true },
-    { id_matkul: 'SI102', nama_matkul: 'Basis Data Lanjut', hari: 'Selasa', sks: 3, status_wajib: true },
-    { id_matkul: 'SI103', nama_matkul: 'Desain UI/UX', hari: 'Rabu', sks: 2, status_wajib: false },
-    { id_matkul: 'SI104', nama_matkul: 'Manajemen Proyek IT', hari: 'Kamis', sks: 3, status_wajib: true },
-    { id_matkul: 'SI105', nama_matkul: 'Bahasa Inggris Bisnis', hari: 'Jumat', sks: 2, status_wajib: false }
-];
-
-function hitungTotalSksWajib(jadwal) {
-    let totalSks = 0;
-
+document.addEventListener("DOMContentLoaded", function() {
+   
+    const greetings = ["Halo", "Hello", "Hola", "Bonjour", "Ciao", "こんにちは", "안녕하세요"];
     
-    for (let matkul of jadwal) {
-        if (matkul.status_wajib === true) {
-            totalSks += matkul.sks;
+
+    const loaderText = document.getElementById('loader-text');
+    const percentText = document.getElementById('percent-text');
+    const progressBar = document.getElementById('progress-bar');
+    const loaderWrapper = document.getElementById('loader-wrapper');
+    
+   
+    document.body.style.overflow = 'hidden';
+
+    const totalDuration = 2500; 
+    let startTimestamp = null;
+    let currentGreetingIndex = -1;
+
+   
+    function animateLoading(timestamp) {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const elapsed = timestamp - startTimestamp;
+        
+        let percent = Math.floor((elapsed / totalDuration) * 100);
+        if (percent > 100) percent = 100;
+        
+        percentText.textContent = percent + '%';
+        progressBar.style.width = percent + '%';
+
+        let expectedGreetingIndex = Math.floor((elapsed / totalDuration) * greetings.length);
+        if (expectedGreetingIndex > currentGreetingIndex && expectedGreetingIndex < greetings.length) {
+            currentGreetingIndex = expectedGreetingIndex;
+            loaderText.classList.remove('text-visible');
+            
+            setTimeout(() => {
+                loaderText.textContent = greetings[currentGreetingIndex];
+                loaderText.classList.add('text-visible');
+            }, 100);
+        }
+
+        if (elapsed < totalDuration) {
+            window.requestAnimationFrame(animateLoading); 
+        } else {
+
+            setTimeout(() => {
+                loaderWrapper.classList.add('loader-hide');
+                setTimeout(() => {
+                    document.body.style.overflow = 'auto';
+                    document.body.classList.add('loaded');
+                    setTimeout(()=> loaderWrapper.remove(), 1000); 
+                }, 600); 
+            }, 400);
         }
     }
-    return totalSks;
-}
+    
+    window.requestAnimationFrame(animateLoading);
 
-
-function filterMatkulBerat(jadwal, minimalSks) {
-    let hasilFilter = [];
-
- 
-    jadwal.forEach(matkul => {
-        if (matkul.sks >= minimalSks) {
-            hasilFilter.push(matkul);
-        }
+   
+    const gradeBadges = document.querySelectorAll('.grade-badge');
+    gradeBadges.forEach(badge => {
+        const grade = badge.textContent.trim().toUpperCase();
+        badge.className = 'grade-badge'; 
+        
+        if (grade === 'A') badge.classList.add('grade-a');
+        else if (grade === 'AB') badge.classList.add('grade-ab');
+        else if (grade === 'B') badge.classList.add('grade-b');
+        else if (grade === 'BC') badge.classList.add('grade-bc');
+        else if (grade === 'C') badge.classList.add('grade-c');
+        else if (grade === 'D') badge.classList.add('grade-d');
+        else if (grade === 'E') badge.classList.add('grade-e');
     });
-
-    return hasilFilter;
-}
-
-console.log("%c=== DATA JADWAL MATA KULIAH (Farrel Rafi) ===", "color: #0EA5E9; font-weight: bold; font-size: 14px;");
-console.log(jadwalKuliah);
-
-console.log("%c\n=== HASIL PERHITUNGAN TOTAL SKS WAJIB ===", "color: #10B981; font-weight: bold; font-size: 14px;");
-let total = hitungTotalSksWajib(jadwalKuliah);
-console.log(`Total SKS untuk mata kuliah wajib Anda adalah: ${total} SKS`);
-
-console.log("%c\n=== HASIL FILTER MATA KULIAH BERAT ===", "color: #D946EF; font-weight: bold; font-size: 14px;");
-let matkulBerat = filterMatkulBerat(jadwalKuliah, 3);
-console.log(matkulBerat);
+});
